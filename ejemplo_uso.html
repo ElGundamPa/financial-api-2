@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial API - Ejemplo de Uso</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .api-info {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .api-info h3 {
+            color: #34495e;
+            margin-top: 0;
+        }
+        .api-info code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .category {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .category h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .symbol {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .name {
+            color: #7f8c8d;
+            flex: 1;
+            margin: 0 15px;
+        }
+        .change {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .positive {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+        .negative {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        .error {
+            background: #fadbd8;
+            color: #e74c3c;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Financial API - Endpoint Simplificado</h1>
+        
+        <div class="api-info">
+            <h3>📋 Información del Endpoint</h3>
+            <p><strong>URL:</strong> <code>http://localhost:8000/api/datos</code></p>
+            <p><strong>Método:</strong> <code>GET</code></p>
+            <p><strong>Autenticación:</strong> <code>X-API-Key</code> header</p>
+            <p><strong>CORS:</strong> Habilitado para todos los orígenes</p>
+            <p><strong>Formato:</strong> JSON unificado con 5 categorías</p>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="btn" onclick="fetchData()">📊 Obtener Datos Financieros</button>
+            <button class="btn" onclick="clearResults()">🗑️ Limpiar Resultados</button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            🔄 Obteniendo datos financieros...
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="stats" class="stats" style="display: none;"></div>
+
+        <div id="results" class="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/datos';
+        const API_KEY = 'mF9zX2q7Lr4pK8yD1sBvWj';
+
+        async function fetchData() {
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            const resultsEl = document.getElementById('results');
+            const statsEl = document.getElementById('stats');
+
+            // Mostrar loading
+            loadingEl.style.display = 'block';
+            errorEl.style.display = 'none';
+            resultsEl.style.display = 'none';
+            statsEl.style.display = 'none';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'X-API-Key': API_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+                displayStats(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                errorEl.style.display = 'block';
+                errorEl.innerHTML = `❌ Error: ${error.message}`;
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        function displayStats(data) {
+            const statsEl = document.getElementById('stats');
+            const categories = ['forex', 'acciones', 'criptomonedas', 'indices', 'materias_primas'];
+            
+            let statsHTML = '';
+            categories.forEach(category => {
+                const items = data[category] || [];
+                statsHTML += `
+                    <div class="stat-card">
+                        <div class="stat-number">${items.length}</div>
+                        <div class="stat-label">${category.toUpperCase()}</div>
+                    </div>
+                `;
+            });
+
+            statsEl.innerHTML = statsHTML;
+            statsEl.style.display = 'grid';
+        }
+
+        function displayResults(data) {
+            const resultsEl = document.getElementById('results');
+            const categories = [
+                { key: 'forex', title: '💱 FOREX', icon: '💱' },
+                { key: 'acciones', title: '📈 ACCIONES', icon: '📈' },
+                { key: 'criptomonedas', title: '₿ CRIPTOMONEDAS', icon: '₿' },
+                { key: 'indices', title: '📊 ÍNDICES', icon: '📊' },
+                { key: 'materias_primas', title: '🛢️ MATERIAS PRIMAS', icon: '🛢️' }
+            ];
+
+            let resultsHTML = '<h2>📋 Datos Financieros</h2>';
+            
+            categories.forEach(category => {
+                const items = data[category.key] || [];
+                if (items.length > 0) {
+                    resultsHTML += `
+                        <div class="category">
+                            <h3>${category.icon} ${category.title} (${items.length} items)</h3>
+                            ${items.map(item => `
+                                <div class="item">
+                                    <span class="symbol">${item.symbol}</span>
+                                    <span class="name">${item.name}</span>
+                                    <span class="change ${getChangeClass(item.change)}">${item.change}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    resultsHTML += `
+                        <div class="category">
+                            <h3>${category.icon} ${category.title} (0 items)</h3>
+                            <p style="color: #7f8c8d; font-style: italic;">Sin datos disponibles</p>
+                        </div>
+                    `;
+                }
+            });
+
+            resultsEl.innerHTML = resultsHTML;
+            resultsEl.style.display = 'block';
+        }
+
+        function getChangeClass(change) {
+            if (!change) return '';
+            return change.includes('+') ? 'positive' : 'negative';
+        }
+
+        function clearResults() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('stats').style.display = 'none';
+        }
+
+        // Ejemplo de uso con fetch nativo
+        console.log('💡 Ejemplo de uso con fetch:');
+        console.log(`
+fetch('${API_URL}', {
+    method: 'GET',
+    headers: {
+        'X-API-Key': '${API_KEY}',
+        'Content-Type': 'application/json'
+    }
+})
+.then(response => response.json())
+.then(data => {
+    console.log('Datos obtenidos:', data);
+    console.log('Total items:', data.total_items);
+    console.log('Forex:', data.forex);
+    console.log('Acciones:', data.acciones);
+    console.log('Criptomonedas:', data.criptomonedas);
+    console.log('Índices:', data.indices);
+    console.log('Materias primas:', data.materias_primas);
+});
+        `);
+    </script>
+</body>
+</html>
