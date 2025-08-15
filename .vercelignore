@@ -1,0 +1,40 @@
+# Archivos de desarrollo local
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Archivos de prueba
+test_*.py
+*_test.py
+
+# Archivos de ejemplo
+ejemplo_uso.html
+
+# Archivos de configuración local
+.env
+.env.local
+
+# Logs
+*.log
+
+# Archivos temporales
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore

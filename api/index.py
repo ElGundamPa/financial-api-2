@@ -392,5 +392,8 @@ def get_etfs():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Para Vercel serverless, necesitamos exportar la app
+# No ejecutar app.run() en serverless
 if __name__ == "__main__":
+    # Solo ejecutar en desarrollo local
     app.run(host="0.0.0.0", port=8000, debug=True)

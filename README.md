@@ -57,23 +57,36 @@ La API estará disponible en: `http://localhost:8000`
 python test_api.py
 ```
 
-## 🌐 Despliegue en Vercel
+## 🌐 Despliegue en Vercel (Serverless)
+
+### ✅ Configuración Serverless Ready
+- **✅ `vercel.json`** - Configuración optimizada para serverless
+- **✅ `api/vercel_app.py`** - Exportación correcta de la app Flask
+- **✅ `.vercelignore`** - Exclusión de archivos innecesarios
+- **✅ Sin `app.run()`** - Compatible con serverless functions
 
 ### 1. Preparar repositorio
-- Asegúrate de que todos los archivos estén en el repositorio
-- Verifica que `api/__init__.py` existe
+- ✅ Todos los archivos están en el repositorio
+- ✅ `api/__init__.py` existe
+- ✅ `api/vercel_app.py` exporta la app correctamente
 
 ### 2. Importar en Vercel
 - Ve a [vercel.com](https://vercel.com)
-- Importa tu repositorio
-- Vercel detectará automáticamente la configuración
+- Conecta tu cuenta de GitHub
+- Importa el repositorio: `ElGundamPa/financial-api-2`
+- Vercel detectará automáticamente la configuración Python
 
-### 3. Variables de entorno (opcional)
+### 3. Variables de entorno (recomendado)
 ```bash
-AUTH_MODE=none                    # Deshabilitar autenticación
-API_KEYS=tu_api_key_aqui          # API keys personalizadas
-CACHE_TTL=90                      # Tiempo de cache en segundos
+AUTH_MODE=apikey                  # Modo de autenticación
+API_KEYS=mF9zX2q7Lr4pK8yD1sBvWj   # API key por defecto
+CACHE_TTL=3000                    # Cache de 50 minutos
 ```
+
+### 4. Verificar despliegue
+- Vercel desplegará automáticamente
+- Los endpoints estarán disponibles en: `https://tu-app.vercel.app/`
+- Prueba el health check: `https://tu-app.vercel.app/health`
 
 ## 📡 Endpoints
 
