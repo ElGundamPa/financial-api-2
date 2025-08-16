@@ -225,11 +225,9 @@ def get_api_datos():
             if "materias_primas" in source_data:
                 response["materias_primas"].extend(source_data["materias_primas"])
             
-            # ETFs (convertir a criptomonedas para este endpoint)
-            if "etfs" in source_data:
-                # Agregar algunos ETFs como criptomonedas para diversidad
-                crypto_etfs = [etf for etf in source_data["etfs"] if etf["symbol"] in ["GBTC", "BITO", "ARKW"]]
-                response["criptomonedas"].extend(crypto_etfs)
+            # Criptomonedas (directamente desde la fuente)
+            if "criptomonedas" in source_data:
+                response["criptomonedas"].extend(source_data["criptomonedas"])
         
         # Limitar a 3-4 elementos por categoría (prioridad a criptomonedas)
         response["forex"] = response["forex"][:3]

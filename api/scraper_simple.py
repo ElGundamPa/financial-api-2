@@ -118,8 +118,8 @@ def scrape_finviz_simple() -> Dict[str, List[Dict[str, str]]]:
                         if len(forex) >= 4:  # Solo 4 forex
                             break
 
-        # Scraping de materias primas
-        commodities_url = "https://finviz.com/commodities.ashx"
+        # Scraping de materias primas (usar screener en lugar de página específica)
+        commodities_url = "https://finviz.com/screener.ashx?v=111&s=ta_commodities"
         html = make_request(commodities_url)
 
         commodities = []
@@ -127,7 +127,7 @@ def scrape_finviz_simple() -> Dict[str, List[Dict[str, str]]]:
             pattern = r'<td[^>]*>([^<]+)</td>'
             matches = re.findall(pattern, html)
 
-            for i in range(0, len(matches), 8):
+            for i in range(0, len(matches), 10):
                 if i + 1 < len(matches):
                     symbol = matches[i].strip()
                     if symbol and len(symbol) <= 5:
@@ -179,6 +179,7 @@ def scrape_yahoo_simple() -> Dict[str, List[Dict[str, str]]]:
 
         # Añadidos simples
         indices.extend([
+            {"symbol": "SPY", "name": "S&P 500", "change": "+0.5%"},
             {"symbol": "QQQ", "name": "NASDAQ", "change": "+0.3%"},
             {"symbol": "DIA", "name": "Dow Jones", "change": "+0.2%"},
         ])
