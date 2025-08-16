@@ -113,31 +113,44 @@ curl -H "Authorization: ApiKey mF9zX2q7Lr4pK8yD1sBvWj" https://tu-app.vercel.app
 
 ### Características
 - **Un solo endpoint** para todos los datos
-- **Formato JSON unificado** con 5 categorías
+- **Formato JSON unificado** con 5 categorías optimizadas
 - **CORS habilitado** para uso desde frontend
 - **Autenticación por token** (X-API-Key)
 - **Sin límites de CORS** - compatible con cualquier dominio
+- **Datos optimizados**: 3-4 elementos por categoría
+- **Prioridad a criptomonedas**: 4 elementos de crypto
 
-### Estructura de respuesta
+### Estructura de respuesta optimizada
 ```json
 {
   "forex": [
-    {"symbol": "EUR/USD", "name": "Euro/Dollar", "change": "-0.1%"}
+    {"symbol": "EUR/USD", "name": "Euro/Dollar", "change": "-0.1%"},
+    {"symbol": "GBP/USD", "name": "Pound/Dollar", "change": "+0.2%"},
+    {"symbol": "USD/JPY", "name": "Dollar/Yen", "change": "+0.3%"}
   ],
   "acciones": [
-    {"symbol": "AAPL", "name": "Apple Inc", "change": "+1.2%"}
+    {"symbol": "AAPL", "name": "Apple Inc", "change": "+1.2%"},
+    {"symbol": "MSFT", "name": "Microsoft", "change": "+0.8%"},
+    {"symbol": "GOOGL", "name": "Google", "change": "+1.5%"}
   ],
   "criptomonedas": [
-    {"symbol": "BTC", "name": "Bitcoin", "change": "+2.5%"}
+    {"symbol": "BTC", "name": "Bitcoin", "change": "+2.5%"},
+    {"symbol": "ETH", "name": "Ethereum", "change": "+1.8%"},
+    {"symbol": "BNB", "name": "Binance Coin", "change": "+3.2%"},
+    {"symbol": "ADA", "name": "Cardano", "change": "+1.5%"}
   ],
   "indices": [
-    {"symbol": "SPY", "name": "S&P 500", "change": "+0.5%"}
+    {"symbol": "SPY", "name": "S&P 500", "change": "+0.5%"},
+    {"symbol": "QQQ", "name": "NASDAQ", "change": "+0.3%"},
+    {"symbol": "DIA", "name": "Dow Jones", "change": "+0.2%"}
   ],
   "materias_primas": [
-    {"symbol": "GC", "name": "Gold", "change": "+0.7%"}
+    {"symbol": "GC", "name": "Gold", "change": "+0.7%"},
+    {"symbol": "CL", "name": "Crude Oil", "change": "-1.2%"},
+    {"symbol": "SI", "name": "Silver", "change": "+0.8%"}
   ],
   "timestamp": 1755281638.2603242,
-  "total_items": 12
+  "total_items": 16
 }
 ```
 

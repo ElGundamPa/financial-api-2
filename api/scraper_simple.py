@@ -49,10 +49,10 @@ def make_request(url: str, headers: Dict[str, str] = None) -> str:
         return ""
 
 def scrape_finviz_simple() -> Dict[str, List[Dict[str, str]]]:
-    """Scraper simple para Finviz"""
-    print("🔄 Scraping Finviz...")
+    """Scraper optimizado para Finviz - Extrae exactamente 3-4 elementos por categoría"""
+    print("🔄 Scraping Finviz (optimizado)...")
     try:
-        # Scraping de índices (nota: es un screener; HTML puede variar)
+        # Scraping de índices principales
         indices_url = "https://finviz.com/screener.ashx?v=111&s=ta_sp500"
         html = make_request(indices_url)
 
@@ -71,7 +71,7 @@ def scrape_finviz_simple() -> Dict[str, List[Dict[str, str]]]:
                             "name": f"{symbol} Index",
                             "change": change
                         })
-                        if len(indices) >= 10:
+                        if len(indices) >= 4:  # Solo 4 índices
                             break
 
         # Scraping de acciones más activas
@@ -93,10 +93,10 @@ def scrape_finviz_simple() -> Dict[str, List[Dict[str, str]]]:
                             "name": f"{symbol} Stock",
                             "change": change
                         })
-                        if len(stocks) >= 10:
+                        if len(stocks) >= 4:  # Solo 4 acciones
                             break
 
-        # Scraping de forex
+        # Scraping de forex principales
         forex_url = "https://finviz.com/forex.ashx"
         html = make_request(forex_url)
 
@@ -115,18 +115,41 @@ def scrape_finviz_simple() -> Dict[str, List[Dict[str, str]]]:
                             "name": f"{symbol} Forex",
                             "change": change
                         })
-                        if len(forex) >= 10:
+                        if len(forex) >= 4:  # Solo 4 forex
+                            break
+
+        # Scraping de materias primas
+        commodities_url = "https://finviz.com/commodities.ashx"
+        html = make_request(commodities_url)
+
+        commodities = []
+        if html:
+            pattern = r'<td[^>]*>([^<]+)</td>'
+            matches = re.findall(pattern, html)
+
+            for i in range(0, len(matches), 8):
+                if i + 1 < len(matches):
+                    symbol = matches[i].strip()
+                    if symbol and len(symbol) <= 5:
+                        change = matches[i + 1].strip() if i + 1 < len(matches) else "N/A"
+                        commodities.append({
+                            "symbol": symbol,
+                            "name": f"{symbol} Commodity",
+                            "change": change
+                        })
+                        if len(commodities) >= 4:  # Solo 4 materias primas
                             break
 
         return {
-            "indices": indices[:5],
-            "acciones": stocks[:5],
-            "forex": forex[:5]
+            "indices": indices[:4],
+            "acciones": stocks[:4],
+            "forex": forex[:4],
+            "materias_primas": commodities[:4]
         }
 
     except Exception as e:
         print(f"❌ Error scraping Finviz: {e}")
-        return {"indices": [], "acciones": [], "forex": []}
+        return {"indices": [], "acciones": [], "forex": [], "materias_primas": []}
 
 def scrape_yahoo_simple() -> Dict[str, List[Dict[str, str]]]:
     """Scraper simple para Yahoo Finance"""
@@ -192,17 +215,20 @@ def scrape_yahoo_simple() -> Dict[str, List[Dict[str, str]]]:
         ]
 
         return {
-            "indices": indices,
-            "acciones": stocks,
-            "forex": forex,
+            "indices": indices[:3],
+            "acciones": stocks[:3],
+            "forex": forex[:3],
             "materias_primas": [
                 {"symbol": "GC=F", "name": "Gold", "change": "+0.5%"},
                 {"symbol": "CL=F", "name": "Crude Oil", "change": "-1.2%"},
-            ],
-            "etfs": [
-                {"symbol": "SPY", "name": "SPDR S&P 500", "change": "+0.5%"},
-                {"symbol": "QQQ", "name": "Invesco QQQ", "change": "+0.3%"},
-            ]
+                {"symbol": "SI=F", "name": "Silver", "change": "+0.8%"},
+            ][:3],
+            "criptomonedas": [
+                {"symbol": "BTC", "name": "Bitcoin", "change": "+2.5%"},
+                {"symbol": "ETH", "name": "Ethereum", "change": "+1.8%"},
+                {"symbol": "BNB", "name": "Binance Coin", "change": "+3.2%"},
+                {"symbol": "ADA", "name": "Cardano", "change": "+1.5%"},
+            ][:4]
         }
 
     except Exception as e:
@@ -247,13 +273,13 @@ async def scrape_all_data() -> Dict[str, Any]:
     }
 
 def create_summary(data: Dict[str, Any]) -> Dict[str, Any]:
-    """Crear resumen de datos por categorías"""
+    """Crear resumen optimizado - 3-4 elementos por categoría, prioridad a criptomonedas"""
     summary = {
         "indices": [],
         "acciones": [],
         "forex": [],
         "materias_primas": [],
-        "etfs": [],
+        "criptomonedas": [],  # Agregar criptomonedas
         "last_updated": time.time(),
         "sources": {},
     }
@@ -262,15 +288,18 @@ def create_summary(data: Dict[str, Any]) -> Dict[str, Any]:
         source_summary = {"has_data": False, "data_types": {}}
         for data_type, items in source_data.items():
             if items and len(items) > 0:
-                summary[data_type].extend(items[:5])  # Top 5 por categoría
+                # Limitar a 3-4 elementos por categoría
+                limit = 4 if data_type == "criptomonedas" else 3  # Prioridad a criptomonedas
+                summary[data_type].extend(items[:limit])
                 source_summary["data_types"][data_type] = len(items)
                 source_summary["has_data"] = True
         summary["sources"][source] = source_summary
 
-    # Limitar resumen a top 10 por categoría
+    # Limitar resumen final a 3-4 elementos por categoría
     for category in summary:
         if isinstance(summary[category], list):
-            summary[category] = summary[category][:10]
+            limit = 4 if category == "criptomonedas" else 3
+            summary[category] = summary[category][:limit]
 
     return summary
 

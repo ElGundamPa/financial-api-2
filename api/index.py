@@ -231,12 +231,12 @@ def get_api_datos():
                 crypto_etfs = [etf for etf in source_data["etfs"] if etf["symbol"] in ["GBTC", "BITO", "ARKW"]]
                 response["criptomonedas"].extend(crypto_etfs)
         
-        # Limitar a top 50 por categoría para mantener respuesta rápida
-        response["forex"] = response["forex"][:50]
-        response["acciones"] = response["acciones"][:50]
-        response["criptomonedas"] = response["criptomonedas"][:50]
-        response["indices"] = response["indices"][:50]
-        response["materias_primas"] = response["materias_primas"][:50]
+        # Limitar a 3-4 elementos por categoría (prioridad a criptomonedas)
+        response["forex"] = response["forex"][:3]
+        response["acciones"] = response["acciones"][:3]
+        response["criptomonedas"] = response["criptomonedas"][:4]  # Prioridad a criptomonedas
+        response["indices"] = response["indices"][:3]
+        response["materias_primas"] = response["materias_primas"][:3]
         
         # Calcular total
         response["total_items"] = (
@@ -259,25 +259,31 @@ def get_api_datos():
             "forex": [
                 {"symbol": "EUR/USD", "name": "Euro/Dollar", "change": "-0.1%"},
                 {"symbol": "GBP/USD", "name": "Pound/Dollar", "change": "+0.2%"},
+                {"symbol": "USD/JPY", "name": "Dollar/Yen", "change": "+0.3%"},
             ],
             "acciones": [
                 {"symbol": "AAPL", "name": "Apple Inc", "change": "+1.2%"},
                 {"symbol": "MSFT", "name": "Microsoft", "change": "+0.8%"},
+                {"symbol": "GOOGL", "name": "Google", "change": "+1.5%"},
             ],
             "criptomonedas": [
                 {"symbol": "BTC", "name": "Bitcoin", "change": "+2.5%"},
                 {"symbol": "ETH", "name": "Ethereum", "change": "+1.8%"},
+                {"symbol": "BNB", "name": "Binance Coin", "change": "+3.2%"},
+                {"symbol": "ADA", "name": "Cardano", "change": "+1.5%"},
             ],
             "indices": [
                 {"symbol": "SPY", "name": "S&P 500", "change": "+0.5%"},
                 {"symbol": "QQQ", "name": "NASDAQ", "change": "+0.3%"},
+                {"symbol": "DIA", "name": "Dow Jones", "change": "+0.2%"},
             ],
             "materias_primas": [
                 {"symbol": "GC", "name": "Gold", "change": "+0.7%"},
                 {"symbol": "CL", "name": "Crude Oil", "change": "-1.2%"},
+                {"symbol": "SI", "name": "Silver", "change": "+0.8%"},
             ],
             "timestamp": time.time(),
-            "total_items": 10,
+            "total_items": 16,
             "note": "Datos de fallback - error en scraping"
         })
 
