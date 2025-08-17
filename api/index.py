@@ -4,6 +4,8 @@ import json
 from typing import Dict, Any
 from flask import Flask, request, jsonify
 from api.scraper_simple import scrape_all_data, create_summary
+from api.scraper_real import scrape_all_real_data
+from api.scraper_tradingview import scrape_all_tradingview_data
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -70,7 +72,7 @@ def health_check():
 
 @app.route("/api/datos")
 def get_api_datos():
-    """Endpoint principal sin CORS"""
+    """Endpoint principal con datos reales verificables"""
     # Verificar autenticación
     if not check_auth():
         return jsonify({
@@ -87,11 +89,11 @@ def get_api_datos():
             return jsonify(cache["api_datos"])
 
     try:
-        # Ejecutar scraping
+        # Usar scraper con TradingView para datos reales
         import asyncio
-        data = asyncio.run(scrape_all_data())
+        real_data = asyncio.run(scrape_all_tradingview_data())
         
-        # Crear respuesta
+        # Crear respuesta con datos reales
         response = {
             "forex": [],
             "acciones": [],
@@ -99,21 +101,20 @@ def get_api_datos():
             "indices": [],
             "materias_primas": [],
             "timestamp": time.time(),
-            "total_items": 0
+            "total_items": 0,
+            "data_source": "tradingview_real"
         }
         
-        # Procesar datos
-        for source_data in data.get("data", {}).values():
-            for category in ["forex", "acciones", "criptomonedas", "indices", "materias_primas"]:
-                if category in source_data:
-                    response[category].extend(source_data[category])
-        
-        # Aplicar límites
-        response["forex"] = response["forex"][:3]
-        response["acciones"] = response["acciones"][:3]
-        response["criptomonedas"] = response["criptomonedas"][:4]
-        response["indices"] = response["indices"][:3]
-        response["materias_primas"] = response["materias_primas"][:3]
+        # Procesar datos reales
+        if "data" in real_data and "tradingview_scraper" in real_data["data"]:
+            source_data = real_data["data"]["tradingview_scraper"]
+            
+            # Aplicar límites específicos
+            response["forex"] = source_data.get("forex", [])[:3]
+            response["acciones"] = source_data.get("acciones", [])[:3]
+            response["criptomonedas"] = source_data.get("criptomonedas", [])[:4]
+            response["indices"] = source_data.get("indices", [])[:3]
+            response["materias_primas"] = source_data.get("materias_primas", [])[:3]
         
         # Calcular total
         response["total_items"] = sum(len(response[cat]) for cat in ["forex", "acciones", "criptomonedas", "indices", "materias_primas"])
@@ -126,7 +127,7 @@ def get_api_datos():
         
     except Exception as e:
         print(f"Error en /api/datos: {e}")
-        # Datos de fallback
+        # Datos de fallback realistas
         return jsonify({
             "forex": [
                 {"symbol": "EUR/USD", "name": "Euro/Dollar", "change": "-0.25%", "price": "1.0850", "max_24h": "1.0870", "min_24h": "1.0830", "volume_24h": "125.5K"},
@@ -147,7 +148,7 @@ def get_api_datos():
             "indices": [
                 {"symbol": "^GSPC", "name": "S&P 500", "change": "+0.85%", "price": "4520.50", "max_24h": "4535.00", "min_24h": "4505.00", "volume_24h": "85.2M"},
                 {"symbol": "^IXIC", "name": "NASDAQ", "change": "+1.25%", "price": "14250.75", "max_24h": "14300.00", "min_24h": "14200.00", "volume_24h": "45.8M"},
-                {"symbol": "^DJI", "name": "Dow Jones", "change": "+0.65%", "price": "35250.00", "max_24h": "35300.00", "min_24h": "35100.00", "volume_24h": "12.5M"}
+                {"symbol": "^DJI", "name": "Dow Jones", "change": "+0.65%", "price": "35250.00", "max_24h": "35300.00", "min_24h": "35100.00", "volume_24h": "12.5M"},
             ],
             "materias_primas": [
                 {"symbol": "GC=F", "name": "Gold", "change": "+0.75%", "price": "2050.50", "max_24h": "2055.00", "min_24h": "2045.00", "volume_24h": "125K"},
@@ -155,7 +156,8 @@ def get_api_datos():
                 {"symbol": "SI=F", "name": "Silver", "change": "+1.25%", "price": "23.45", "max_24h": "23.60", "min_24h": "23.30", "volume_24h": "45K"}
             ],
             "timestamp": time.time(),
-            "total_items": 16
+            "total_items": 16,
+            "data_source": "fallback"
         })
 
 # Para desarrollo local
