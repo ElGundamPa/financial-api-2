@@ -192,7 +192,7 @@ class DataCleaner:
             cleaned['price'] = validator.sanitize_price(cleaned['price'])
         
         # Limpiar cambios porcentuales
-        for field in ['change_1d_pct', 'change_24h_pct', 'change_1h_pct']:
+        for field in ['change_24h_pct', 'change_1h_pct']:
             if field in cleaned and isinstance(cleaned[field], str):
                 cleaned[field] = validator.sanitize_percentage(cleaned[field])
         
@@ -226,7 +226,7 @@ class DataCleaner:
             return False
         
         # Validaciones opcionales
-        for field in ['change_1d_pct', 'change_24h_pct', 'change_1h_pct']:
+        for field in ['change_24h_pct', 'change_1h_pct']:
             if field in data and not validator.validate_change_percentage(data[field], category):
                 return False
         

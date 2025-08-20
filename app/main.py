@@ -251,7 +251,7 @@ def create_app():
                     price_examples.append({
                         "symbol": snapshot.symbol,
                         "price": snapshot.price,
-                        "change_1d_pct": snapshot.change_1d_pct
+                        "change_24h_pct": snapshot.change_24h_pct
                     })
                 
                 verification_results[provider_name] = {
