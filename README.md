@@ -1,10 +1,10 @@
-# 📈 Financial API 2.0
+# 📈 Financial API 2.0 (TradingView-only)
 
-Una API moderna de datos financieros que extrae información en tiempo real de múltiples fuentes como TradingView, Yahoo Finance y Finviz.
+Estado temporal: Proveedor único TradingView. Compatible con Vercel (Python 3.11), sin Selenium/Chromium, solo HTTP + parseo HTML.
 
 ## 🚀 Características
 
-- ✅ **Múltiples Fuentes**: TradingView, Yahoo Finance, Finviz
+- ✅ **Proveedor Único**: TradingView (temporalmente)
 - ✅ **Datos en Tiempo Real**: Precios y cambios porcentuales actualizados
 - ✅ **Múltiples Categorías**: Crypto, Stocks, Forex, Indices, Commodities
 - ✅ **API RESTful**: Endpoints JSON bien estructurados
@@ -49,33 +49,20 @@ GET /api/health
 ```
 Verifica el estado de la API y todos los providers.
 
-### Verificación
+### Verificación estricta (TradingView)
 ```http
 GET /api/verify
 ```
-Ejecuta una verificación rápida de todos los scrapers.
+Verifica por categoría: expected_count vs scraped_count y 3 muestras del cálculo de price_24h.
 
-### Scraping Principal
+### Precio y 24h (nuevo)
 ```http
-GET /api/scrape?providers=<providers>&categories=<categories>&limit=<limit>
+GET /api/price24h?category=<cat>&limit_per_page=<n>&cursor=<token>
 ```
-
-**Parámetros**:
-- `providers`: `tradingview`, `yahoo`, `finviz`, o `all`
-- `categories`: `crypto`, `stocks`, `forex`, `indices`, `commodities`, o `all`
-- `limit`: Número máximo de elementos a devolver
-
-**Ejemplos**:
-```http
-# Crypto de TradingView
-GET /api/scrape?providers=tradingview&categories=crypto&limit=50
-
-# Stocks de múltiples providers
-GET /api/scrape?providers=tradingview,yahoo&categories=stocks&limit=100
-
-# Todo disponible
-GET /api/scrape?providers=all&categories=all&limit=200
-```
+Parámetros:
+- `category`: `indices|crypto|forex|futures|stocks`
+- `limit_per_page`: Máximo por lote (default 200)
+- `cursor`: token opaco base64 con offset
 
 ## 🏗️ Estructura del Proyecto
 
@@ -84,9 +71,13 @@ financial-api2.0/
 ├── app/                          # Código principal de la aplicación
 │   ├── adapters/                 # Adapters para cada proveedor
 │   │   ├── base.py              # Interfaces base
-│   │   ├── tradingview.py       # Adapter para TradingView
-│   │   ├── yahoo.py             # Adapter para Yahoo Finance
-│   │   ├── finviz.py            # Adapter para Finviz
+│   │   ├── tradingview/         # Submódulos por categoría (TradingView)
+│   │   │   ├── common.py
+│   │   │   ├── crypto.py
+│   │   │   ├── indices.py
+│   │   │   ├── forex.py
+│   │   │   ├── futures.py
+│   │   │   └── stocks.py
 │   │   ├── mock.py              # Adapter de prueba
 │   │   └── alpha_vantage.py     # Adapter para Alpha Vantage
 │   ├── main.py                   # Aplicación Flask principal
@@ -96,8 +87,8 @@ financial-api2.0/
 │   ├── cache.py                  # Sistema de caché
 │   └── validation.py             # Validación de datos
 ├── tests/                        # Tests unitarios
-├── test_api_comprehensive.py     # Test integral de la API
-├── test_api_final.py            # Test final de funcionalidad
+├── test_api_comprehensive.py     # Test integral (legacy)
+├── test_api_final.py            # Test final (legacy)
 ├── requirements.txt              # Dependencias Python
 ├── vercel.json                   # Configuración para Vercel
 └── README.md                     # Este archivo
@@ -115,27 +106,28 @@ python test_api_comprehensive.py
 python test_api_final.py
 ```
 
-## 📈 Ejemplo de Respuesta
+## 📈 Ejemplo de Respuesta (/api/price24h)
 
 ```json
 {
   "meta": {
     "ts": "2025-08-20T00:30:00.000000",
-    "providers": ["tradingview"],
-    "categories": ["crypto"],
-    "limit_per_page": 50
+    "provider": "tradingview",
+    "category": "crypto",
+    "limit_per_page": 200,
+    "next_cursor": null,
+    "status": "ok"
   },
   "data": [
     {
       "provider": "tradingview",
       "category": "crypto",
       "symbol": "BTC",
-      "name": "Bitcoin",
       "price": 113617.26,
       "change_24h_pct": -1.35,
-      "change_1h_pct": null,
-      "currency": "USD",
-      "ts": "2025-08-20T00:30:00.000000"
+      "price_24h": 115180.00,
+      "ts": "2025-08-20T00:30:00.000000",
+      "meta": {}
     }
   ]
 }
