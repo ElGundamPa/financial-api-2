@@ -1,14 +1,63 @@
 {
+  "version": 2,
   "functions": {
-    "api/vercel_app.py": {
-      "runtime": "python3.12"
+    "api/*.py": {
+      "runtime": "python3.11",
+      "maxDuration": 30,
+      "memory": 1024,
+      "environment": {
+        "PYTHONPATH": "/var/task"
+      }
     }
   },
   "routes": [
-    { "src": "^/health$", "dest": "/api/vercel_app.py" },
-    { "src": "^/datos$", "dest": "/api/vercel_app.py" },
-    { "src": "^/datos/resume$", "dest": "/api/vercel_app.py" },
-    { "src": "^/api/datos$", "dest": "/api/vercel_app.py" },
-    { "src": "^/$", "dest": "/api/vercel_app.py" }
+    { "src": "/api/health", "dest": "api/vercel_app.py" },
+    { "src": "/api/scrape", "dest": "api/vercel_app.py" },
+    { "src": "/api/stats", "dest": "api/vercel_app.py" },
+    { "src": "/api/auth", "dest": "api/vercel_app.py" },
+    { "src": "/", "dest": "api/vercel_app.py" },
+    { "src": "/(.*)", "dest": "api/vercel_app.py" }
+  ],
+  "env": {
+    "MAX_CONCURRENCY": "4",
+    "REQUEST_TIMEOUT": "15",
+    "RETRY_MAX": "3",
+    "RESPECT_ROBOTS": "true",
+    "DEFAULT_LIMIT_PER_PAGE": "50",
+    "DEFAULT_HOURS_WINDOW": "1",
+    "API_KEYS": "demo_key_12345|Demo User|100,prod_key_67890|Production User|1000",
+    "ALPHA_VANTAGE_API_KEY": "",
+    "REDIS_URL": "",
+    "SENTRY_DSN": "",
+    "ENVIRONMENT": "production"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, X-API-Key, Authorization"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=60"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/docs",
+      "destination": "https://github.com/your-repo/financial-api2.0#readme"
+    }
   ]
 }
